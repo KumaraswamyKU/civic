@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+dataset/train/*
+dataset/val/*
+!dataset/train/.gitkeep
+!dataset/val/.gitkeep
+media/*
+!media/.gitkeep
+staticfiles/
+.env

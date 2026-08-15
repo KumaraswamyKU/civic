@@ -1,0 +1,125 @@
+# =============================================================================
+# CIVIC — AI civic-issue reporter (Django + Flutter)
+# =============================================================================
+
+# ----- Environment / secrets -----
+# Real secrets live in .env; .env.example stays in git as the template.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# ----- Python / Django -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Django generated / local runtime
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+backend/staticfiles/
+backend/media/
+backend/media/**
+!backend/media/.gitkeep
+
+# Test / type-check caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter (if used while exploring the dataset)
+.ipynb_checkpoints/
+
+# ----- Dataset (Kaggle images — too large for git) -----
+# Keep README.md so the expected folder layout is documented.
+backend/dataset/train/**
+backend/dataset/val/**
+!backend/dataset/train/.gitkeep
+!backend/dataset/val/.gitkeep
+
+# ----- Trained ML weights -----
+# Keep ml_models/README.md; ignore binary checkpoints.
+backend/ml_models/*.h5
+backend/ml_models/*.keras
+backend/ml_models/*.hdf5
+backend/ml_models/*.pb
+backend/ml_models/*.ckpt
+backend/ml_models/*.ckpt.*
+backend/ml_models/*.tflite
+backend/ml_models/*.onnx
+backend/ml_models/saved_model/
+*.h5
+*.keras
+*.hdf5
+*.tflite
+*.onnx
+
+# TensorFlow / training artifacts
+checkpoint
+events.out.tfevents.*
+logs/
+wandb/
+
+# ----- Flutter / Dart -----
+# Native folders are generated per machine via `flutter create .` (see frontend/SETUP.md)
+frontend/android/
+frontend/ios/
+frontend/linux/
+frontend/macos/
+frontend/windows/
+frontend/web/
+
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.metadata
+frontend/pubspec.lock
+frontend/build/
+*.iml
+
+# ----- Docker / local volumes accidentally copied to disk -----
+postgres_data/
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ----- IDEs / editors -----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.code-workspace
