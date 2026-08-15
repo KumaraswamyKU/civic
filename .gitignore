@@ -123,3 +123,6 @@ $RECYCLE.BIN/
 .classpath
 .settings/
 *.code-workspace
+
+# ----- Local real-image testing -----
+backend/test_images/
