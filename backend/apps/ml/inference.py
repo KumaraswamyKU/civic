@@ -66,7 +66,10 @@ def classify_image(image_path: str):
         from tensorflow.keras.preprocessing import image as keras_image
 
         img = keras_image.load_img(image_path, target_size=settings.ML_IMAGE_SIZE)
-        arr = keras_image.img_to_array(img) / 255.0
+        # img_to_array is [0, 255], matching image_dataset_from_directory.
+        # Do not divide by 255: the saved model already applies
+        # mobilenet_v2.preprocess_input (expects [0, 255] → [-1, 1]).
+        arr = keras_image.img_to_array(img)
         arr = np.expand_dims(arr, axis=0)
 
         predictions = model.predict(arr, verbose=0)[0]
