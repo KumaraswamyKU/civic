@@ -13,5 +13,7 @@ class IsCitizenOwnerOrDeptAdmin(permissions.BasePermission):
         if user.role == user.Role.SUPER_ADMIN:
             return True
         if user.role == user.Role.DEPT_ADMIN:
+            if user.department_id is None:
+                return False
             return obj.department_id == user.department_id
         return obj.citizen_id == user.id

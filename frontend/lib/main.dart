@@ -1,63 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'models/user.dart';
-import 'screens/home_screen.dart';
+import 'config/app_theme.dart';
+import 'providers/auth_controller.dart';
+import 'screens/citizen_gate_screen.dart';
 import 'screens/login_screen.dart';
-import 'services/auth_service.dart';
+import 'screens/operations_shell.dart';
+import 'services/app_services.dart';
 
 void main() {
-  runApp(const CivicIssueApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(CivicOpsApp(auth: AuthController(AppServices())));
 }
 
-class CivicIssueApp extends StatelessWidget {
-  const CivicIssueApp({super.key});
+class CivicOpsApp extends StatefulWidget {
+  const CivicOpsApp({super.key, required this.auth});
+
+  final AuthController auth;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Civic Issue Reporter',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.indigo,
-        useMaterial3: true,
-      ),
-      home: const _StartupGate(),
-    );
-  }
+  State<CivicOpsApp> createState() => _CivicOpsAppState();
 }
 
-/// Checks for a saved login token on app start and routes straight to
-/// HomeScreen if still valid, otherwise shows the login screen.
-class _StartupGate extends StatefulWidget {
-  const _StartupGate();
-
-  @override
-  State<_StartupGate> createState() => _StartupGateState();
-}
-
-class _StartupGateState extends State<_StartupGate> {
-  final _authService = AuthService();
-  late Future<AppUser?> _userFuture;
-
+class _CivicOpsAppState extends State<CivicOpsApp> {
   @override
   void initState() {
     super.initState();
-    _userFuture = _authService.fetchCurrentUser();
+    widget.auth.restore();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<AppUser?>(
-      future: _userFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-        if (snapshot.data != null) {
-          return HomeScreen(user: snapshot.data!);
-        }
-        return const LoginScreen();
-      },
+    return ChangeNotifierProvider.value(
+      value: widget.auth,
+      child: MaterialApp(
+        title: 'Civic Operations Center',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        home: const _Gate(),
+      ),
     );
+  }
+}
+
+class _Gate extends StatelessWidget {
+  const _Gate();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+    if (auth.restoring) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final user = auth.user;
+    if (user == null) {
+      return const LoginScreen();
+    }
+    if (!user.isStaff) {
+      return const CitizenGateScreen();
+    }
+    return const OperationsShell();
   }
 }

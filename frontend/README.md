@@ -1,26 +1,36 @@
-# Civic Issue App (Flutter)
+# Civic Operations Center (Flutter web)
 
-Frontend for the AI-Based Civic Issue Detection, Prioritization and
-Automated Reporting System.
+Web application for **department admins** and **super admins**.
 
-## Configure the backend URL
+Citizens report issues in `civic_mobile/`. This app is the operations console.
 
-Edit `lib/config/api_config.dart` and set `baseUrl` to wherever the
-Django backend is reachable from your device/emulator:
+## Configure the backend
 
-- Android emulator talking to Docker on the same machine: `http://10.0.2.2:8000`
-- Physical device on the same Wi-Fi as your machine: `http://<your-lan-ip>:8000`
+Default API host:
+
+- Web / Windows: `http://127.0.0.1:8000`
+- Android emulator: `http://10.0.2.2:8000`
+
+Override:
+
+```
+flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+## First-time platform folders
+
+```
+cd frontend
+flutter create . --project-name civic_issue_app --org com.civicsystem --platforms=web,windows
+flutter pub get
+```
 
 ## Run
 
+Start Django (Docker on port 8000), then:
+
 ```
-flutter pub get
-flutter run
+flutter run -d chrome
 ```
 
-## Required Android permissions
-
-Already declared in `android/app/src/main/AndroidManifest.xml` (once you
-generate the Android folder with `flutter create .`):
-`INTERNET`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`,
-`CAMERA`, `READ_MEDIA_IMAGES`.
+Sign in with a `dept_admin` or `super_admin` account (see `seed_departments`).

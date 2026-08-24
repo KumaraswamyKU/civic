@@ -12,12 +12,13 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
 
 class ComplaintSerializer(serializers.ModelSerializer):
     citizen_name = serializers.CharField(source="citizen.full_name", read_only=True)
+    citizen_email = serializers.EmailField(source="citizen.email", read_only=True)
     department_name = serializers.CharField(source="department.name", read_only=True)
 
     class Meta:
         model = Complaint
         fields = [
-            "id", "citizen", "citizen_name", "image", "description",
+            "id", "citizen", "citizen_name", "citizen_email", "image", "description",
             "latitude", "longitude", "address_text",
             "issue_type", "classification_confidence", "priority", "status",
             "department", "department_name",

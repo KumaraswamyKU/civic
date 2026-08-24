@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -16,6 +17,18 @@ from .serializers import (
 from .utils import estimate_priority, resolve_department_for_issue
 
 
+def complaints_visible_to(user):
+    """Role scope from the authenticated user. Never from query params."""
+    qs = Complaint.objects.select_related("department", "citizen")
+    if user.role == user.Role.SUPER_ADMIN:
+        return qs
+    if user.role == user.Role.DEPT_ADMIN:
+        if user.department_id is None:
+            return qs.none()
+        return qs.filter(department_id=user.department_id)
+    return qs.filter(citizen=user)
+
+
 class ComplaintViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsCitizenOwnerOrDeptAdmin]
     http_method_names = ["get", "post", "patch", "head", "options"]
@@ -27,12 +40,42 @@ class ComplaintViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Complaint.objects.select_related("department", "citizen")
+        qs = complaints_visible_to(user)
+
+        params = self.request.query_params
+        status_filter = params.get("status")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        priority = params.get("priority")
+        if priority:
+            qs = qs.filter(priority=priority)
+        issue_type = params.get("issue_type")
+        if issue_type:
+            qs = qs.filter(issue_type=issue_type)
+
+        # Department filter is super_admin-only. dept_admin/citizen cannot
+        # widen (or retarget) scope with ?department=.
         if user.role == user.Role.SUPER_ADMIN:
-            return qs
-        if user.role == user.Role.DEPT_ADMIN:
-            return qs.filter(department_id=user.department_id)
-        return qs.filter(citizen=user)
+            department = params.get("department")
+            if department:
+                qs = qs.filter(department_id=department)
+
+        search = (params.get("search") or "").strip()
+        if search:
+            query = (
+                Q(description__icontains=search)
+                | Q(citizen__full_name__icontains=search)
+                | Q(address_text__icontains=search)
+                | Q(issue_type__icontains=search)
+            )
+            if search.isdigit():
+                query |= Q(pk=int(search))
+            qs = qs.filter(query)
+
+        ordering = params.get("ordering")
+        if ordering in {"created_at", "-created_at"}:
+            qs = qs.order_by(ordering)
+        return qs
 
     def perform_create(self, serializer):
         complaint = serializer.save(citizen=self.request.user)
