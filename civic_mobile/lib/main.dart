@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'config/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'screens/admin_home_screen.dart';
-import 'screens/citizen_home_screen.dart';
+import 'screens/citizen_shell_screen.dart';
 import 'screens/complaint_detail_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/report_issue_screen.dart';
@@ -11,6 +11,7 @@ import 'screens/signup_screen.dart';
 import 'screens/start_screen.dart';
 import 'services/app_services.dart';
 import 'utils/app_routes.dart';
+import 'widgets/civic_app_frame.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,12 +42,13 @@ class _CivicAppState extends State<CivicApp> {
         title: 'Civic',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
+        builder: (context, child) => CivicAppFrame(child: child ?? const SizedBox.shrink()),
         initialRoute: AppRoutes.start,
         routes: {
           AppRoutes.start: (_) => const StartScreen(),
           AppRoutes.login: (_) => const LoginScreen(),
           AppRoutes.signup: (_) => const SignupScreen(),
-          AppRoutes.citizenHome: (_) => const CitizenHomeScreen(),
+          AppRoutes.citizenHome: (_) => const CitizenShellScreen(),
           AppRoutes.adminHome: (_) => const AdminHomeScreen(),
           AppRoutes.reportIssue: (_) => const ReportIssueScreen(),
         },

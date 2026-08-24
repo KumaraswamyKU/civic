@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(CivicApp(auth: AuthProvider(AppServices())));
     await tester.pump();
 
-    expect(find.text('Civic'), findsOneWidget);
-    expect(find.text('Flutter application is running'), findsOneWidget);
+    expect(find.text('Civic'), findsWidgets);
+    expect(find.textContaining('Report'), findsWidgets);
   });
 }

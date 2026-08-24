@@ -18,6 +18,12 @@ class ComplaintsProvider extends ChangeNotifier {
   String? error;
   ApiException? lastException;
 
+  int get resolvedCount => items.where((item) => item.status == 'resolved').length;
+
+  int get activeCount => items.where((item) {
+        return item.status == 'reported' || item.status == 'in_progress';
+      }).length;
+
   Future<void> refresh() {
     _page = 1;
     return _fetch(replace: true);

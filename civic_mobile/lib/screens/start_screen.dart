@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../config/api_config.dart';
+import '../config/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_routes.dart';
-import '../widgets/app_info_row.dart';
 import '../widgets/civic_header.dart';
-import '../widgets/status_badge.dart';
+import '../widgets/civic_scene.dart';
 
-/// Confirms the Flutter client is running and shows how it will reach Django.
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
 
@@ -15,82 +13,112 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = AuthScope.of(context);
     final user = auth.user;
-
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              children: [
-                const CivicHeader(),
-                const SizedBox(height: 8),
-                Text(
-                  'Issue detection and reporting',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Center(child: StatusBadge(label: 'Flutter application is running')),
-                const SizedBox(height: 28),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Backend connection',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        AppInfoRow(label: 'API base URL', value: ApiConfig.baseUrl),
-                        const AppInfoRow(label: 'Auth', value: 'SimpleJWT (Bearer)'),
-                        AppInfoRow(
-                          label: 'Session',
-                          value: user == null ? 'Signed out' : '${user.fullName} (${user.role})',
-                        ),
-                      ],
+      backgroundColor: CivicTokens.hero,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 11,
+            child: CivicHeroBackdrop(
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    const CivicHeader(
+                      light: true,
+                      subtitle: 'Better city. Better community.',
                     ),
-                  ),
+                    const Spacer(),
+                    Text(
+                      'Report local issues.\nTrack progress.\nMake an impact.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            height: 1.45,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('Sign in'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('Create citizen account'),
-                  ),
-                ),
-                if (user != null) ...[
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      final route = user.isStaffUser
-                          ? AppRoutes.adminHome
-                          : AppRoutes.citizenHome;
-                      Navigator.pushNamed(context, route);
-                    },
-                    child: const Text('Continue to app'),
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
-        ),
+          Expanded(
+            flex: 9,
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: CivicTokens.background,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+                  children: [
+                    const Center(child: _Pill(icon: Icons.photo_camera_outlined, label: 'Report local issues')),
+                    const SizedBox(height: 8),
+                    const Center(child: _Pill(icon: Icons.timeline, label: 'Track progress')),
+                    const SizedBox(height: 8),
+                    const Center(child: _Pill(icon: Icons.diversity_3_outlined, label: 'Make an impact')),
+                    const SizedBox(height: 28),
+                    if (auth.restoring)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    FilledButton(
+                      onPressed: () => Navigator.pushNamed(context, AppRoutes.login),
+                      child: const Text('Sign in'),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton(
+                      onPressed: () => Navigator.pushNamed(context, AppRoutes.signup),
+                      child: const Text('Create account'),
+                    ),
+                    if (user != null)
+                      TextButton(
+                        onPressed: () {
+                          final route = user.isStaffUser ? AppRoutes.adminHome : AppRoutes.citizenHome;
+                          Navigator.pushNamedAndRemoveUntil(context, route, (route) => false);
+                        },
+                        child: Text('Continue as ${user.firstName}'),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: CivicTokens.surface,
+        borderRadius: BorderRadius.circular(CivicTokens.radiusPill),
+        border: Border.all(color: CivicTokens.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: CivicTokens.primary),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        ],
       ),
     );
   }

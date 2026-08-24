@@ -25,6 +25,14 @@ class User {
   bool get isSuperAdmin => role == 'super_admin';
   bool get isStaffUser => isDeptAdmin || isSuperAdmin;
 
+  String get firstName {
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) {
+      return 'there';
+    }
+    return parts.first;
+  }
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: asInt(json['id']),

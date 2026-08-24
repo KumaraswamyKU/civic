@@ -8,4 +8,5 @@ class AppRoutes {
   static const String adminHome = '/admin-home';
   static const String reportIssue = '/report-issue';
   static const String complaintDetail = '/complaint-detail';
+  static const String profile = '/profile';
 }

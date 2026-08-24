@@ -23,9 +23,11 @@ class ImagePickService {
   }
 
   Future<PickedComplaintImage?> _pick(ImageSource source) async {
+    // Cap the long edge for upload size while keeping enough detail for MobileNetV2.
     final file = await _picker.pickImage(
       source: source,
       maxWidth: 1920,
+      maxHeight: 1920,
       imageQuality: 85,
     );
     if (file == null) {

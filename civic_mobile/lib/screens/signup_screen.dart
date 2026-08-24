@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../providers/auth_provider.dart';
 import '../utils/app_routes.dart';
+import '../utils/error_messages.dart';
 import '../widgets/civic_header.dart';
+import '../widgets/civic_scene.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,7 +19,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
+  final _confirm = TextEditingController();
   bool _busy = false;
+  bool _obscure = true;
 
   @override
   void dispose() {
@@ -25,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _email.dispose();
     _phone.dispose();
     _password.dispose();
+    _confirm.dispose();
     super.dispose();
   }
 
@@ -32,6 +37,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    FocusScope.of(context).unfocus();
     setState(() => _busy = true);
     final auth = AuthScope.of(context);
     try {
@@ -52,7 +58,9 @@ class _SignupScreenState extends State<SignupScreen> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(userFacingError(e))),
+      );
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -63,75 +71,126 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              const CivicHeader(compact: true),
-              const SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _name,
-                      decoration: const InputDecoration(
-                        labelText: 'Full name',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone number',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) =>
-                          (v == null || v.length < 8) ? 'At least 8 characters' : null,
-                    ),
-                    const SizedBox(height: 20),
-                    FilledButton(
-                      onPressed: _busy ? null : _submit,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        child: Text(_busy ? 'Creating…' : 'Create account'),
-                      ),
-                    ),
-                  ],
-                ),
+      body: Column(
+        children: [
+          CivicHeroBackdrop(
+            height: 156,
+            padding: const EdgeInsets.fromLTRB(8, 8, 16, 16),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    tooltip: 'Back',
+                    color: Colors.white,
+                    onPressed: () => Navigator.maybePop(context),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  const Center(child: CivicHeader(compact: true, light: true, subtitle: 'Register as a citizen')),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Expanded(
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _name,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Full name',
+                          prefixIcon: Icon(Icons.badge_outlined),
+                        ),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.mail_outline),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Enter your email';
+                          }
+                          if (!v.contains('@')) {
+                            return 'Enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _phone,
+                        keyboardType: TextInputType.phone,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone number',
+                          prefixIcon: Icon(Icons.phone_outlined),
+                        ),
+                        validator: (v) =>
+                            (v == null || v.trim().length < 10) ? 'Enter a valid phone number' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _password,
+                        obscureText: _obscure,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            tooltip: _obscure ? 'Show password' : 'Hide password',
+                            onPressed: () => setState(() => _obscure = !_obscure),
+                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                          ),
+                        ),
+                        validator: (v) =>
+                            (v == null || v.length < 8) ? 'At least 8 characters' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _confirm,
+                        obscureText: _obscure,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _submit(),
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm password',
+                          prefixIcon: Icon(Icons.lock_reset_outlined),
+                        ),
+                        validator: (v) =>
+                            v != _password.text ? 'Passwords do not match' : null,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: _busy ? null : _submit,
+                        child: Text(_busy ? 'Creating account…' : 'Create account'),
+                      ),
+                      TextButton(
+                        onPressed: _busy
+                            ? null
+                            : () => Navigator.pushReplacementNamed(context, AppRoutes.login),
+                        child: const Text('Already have an account? Sign in'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

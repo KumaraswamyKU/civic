@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../providers/auth_provider.dart';
 import '../utils/app_routes.dart';
+import '../widgets/civic_page_body.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
@@ -29,14 +30,16 @@ class AdminHomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
+      body: SafeArea(
+        child: CivicPageBody(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            user == null
-                ? 'Sign in as a department admin to load GET /api/reports/summary/.'
-                : 'Signed in as ${user.fullName} (${user.role}). Summary and CSV export are wired in ReportService.',
-            textAlign: TextAlign.center,
+          child: Center(
+            child: Text(
+              user == null
+                  ? 'Sign in as a department admin to continue.'
+                  : 'Signed in as ${user.fullName}. Department tools will use the existing reports API.',
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),

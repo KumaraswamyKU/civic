@@ -5,6 +5,35 @@ String formatApiLabel(String value) {
   return value.replaceAll('_', ' ');
 }
 
+/// Title-cased label for UI chips and headings (`in_progress` → `In Progress`).
+String formatDisplayLabel(String value) {
+  final raw = formatApiLabel(value);
+  if (raw == '—') {
+    return raw;
+  }
+  return raw
+      .split(' ')
+      .where((part) => part.isNotEmpty)
+      .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+      .join(' ');
+}
+
+String formatDateShort(DateTime? value) {
+  if (value == null) {
+    return '—';
+  }
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  final local = value.toLocal();
+  return '${local.day} ${months[local.month - 1]} ${local.year}';
+}
+
+String formatComplaintId(int id) {
+  return 'Complaint #${id.toString().padLeft(3, '0')}';
+}
+
 String formatDateTime(DateTime? value) {
   if (value == null) {
     return '—';
